@@ -1,9 +1,14 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import MovieCard from "./MovieCard.tsx"
+import MovieCard from "./MovieCard";
+import { useState } from "react";
+import { MovieDetails } from "../services/movieApi";
 
-const MovieCarousel = ({ movies }) => {
+interface MovieCarouselProps {
+  movies: MovieDetails[];
+}
+
+const MovieCarousel: React.FC<MovieCarouselProps> = ({ movies }) => {
   const [startIndex, setStartIndex] = useState(0);
   const visibleMovies = 4;
 
@@ -18,6 +23,7 @@ const MovieCarousel = ({ movies }) => {
       prev === 0 ? Math.max(0, movies.length - visibleMovies) : prev - 1
     );
   };
+
   return (
     <div className="relative group">
       <div className="overflow-hidden">
@@ -33,7 +39,7 @@ const MovieCarousel = ({ movies }) => {
               className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 flex-shrink-0 p-2"
             >
               <Link to={`/movie/${movie.id}`}>
-                <MovieCard {...movie} />
+                <MovieCard movie={movie} />
               </Link>
             </div>
           ))}

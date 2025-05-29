@@ -1,7 +1,8 @@
-import React from 'react'
-import {useEffect, useState} from "react";
+import React  from "react";
+import { useState,useEffect } from "react";
 import{Star,Calendar,Play} from "lucide-react";
 import {Link } from "react-router-dom";
+
 
 
 const featuredMovies = [

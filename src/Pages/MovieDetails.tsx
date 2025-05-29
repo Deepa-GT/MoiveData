@@ -1,406 +1,658 @@
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
+import { Star, Calendar, Clock, DollarSign, Users, Play, X } from 'lucide-react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import Loading from '../components/Loading';
+import { getImageUrl, tmdbService } from '../services/tmdb';
 import {
-    Award,
-    BarChart3,
-    Calendar,
-    Clock,
-    DollarSign,
-    Globe,
-    Heart,
-    Play,
-    Share2,
-    Star,
-  } from "lucide-react";
-  import React from "react";
-  import { Link, useParams } from "react-router-dom";
-  
-  const MovieDetails = () => {
-    const Movies = [
-      {
-        id: 1,
-        title: "Dune: Part Two",
-        rating: 8.8,
-        year: 2024,
-        duration: "166 min",
-        genre: ["Action", "Adventure", "Drama", "Sci-Fi"],
-        director: "Denis Villeneuve",
-        description:
-          "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the universe, he endeavors to prevent a terrible future only he can foresee.",
-        image:
-          "https://images.unsplash.com/photo-1534809027769-b00d750a6bac?auto=format&fit=crop&w=2000&q=80",
-        backdrop:
-          "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=2000&q=80",
-        cast: [
-          {
-            id: 1,
-            name: "Timothée Chalamet",
-            role: "Paul Atreides",
-            image:
-              "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80",
-            bio: "Rising star known for his compelling performances",
-          },
-          {
-            id: 2,
-            name: "Zendaya",
-            role: "Chani",
-            image:
-              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-            bio: "Multi-talented actress and fashion icon",
-          },
-        ],
-        trailer: "https://youtu.be/Way9Dexny3w",
-        awards: ["Academy Award Nominee", "Golden Globe Nominee"],
-        boxOffice: "$494.7M",
-        language: "English",
-        productionCompany: "Legendary Entertainment",
-        releaseDate: "2024-03-01",
-        metacriticScore: 81,
-        rottenTomatoesScore: 94,
-      },
-      {
-        id: 3,
-        title: "Oppenheimer",
-        rating: 8.4,
-        year: 2023,
-        duration: "180 min",
-        genre: ["Biography", "Drama", "History"],
-        director: "Christopher Nolan",
-        description:
-          "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb during World War II, exploring the moral complexities and consequences of scientific discovery.",
-        image:
-          "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=2000&q=80",
-        backdrop:
-          "https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?auto=format&fit=crop&w=2000&q=80",
-        cast: [
-          {
-            id: 3,
-            name: "Cillian Murphy",
-            role: "J. Robert Oppenheimer",
-            image:
-              "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
-            bio: "Versatile actor known for intense performances",
-          },
-          {
-            id: 4,
-            name: "Emily Blunt",
-            role: "Katherine Oppenheimer",
-            image:
-              "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80",
-            bio: "Acclaimed actress with numerous awards",
-          },
-        ],
-        trailer: "https://youtu.be/uYPbbksJxIg",
-        awards: ["Academy Award Winner", "BAFTA Winner", "Golden Globe Winner"],
-        boxOffice: "$957.8M",
-        language: "English",
-        productionCompany: "Universal Pictures",
-        releaseDate: "2023-07-21",
-        metacriticScore: 89,
-        rottenTomatoesScore: 93,
-      },
-      {
-        id: 2,
-        title: "Poor Things",
-        rating: 8.3,
-        year: 2023,
-        duration: "141 min",
-        genre: ["Comedy", "Drama", "Romance", "Sci-Fi"],
-        director: "Yorgos Lanthimos",
-        description:
-          "The incredible tale of Bella Baxter, a young woman brought back to life by the brilliant and unorthodox scientist Dr. Godwin Baxter. Under his protection, Bella is eager to learn.",
-        image:
-          "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=2000&q=80",
-        backdrop:
-          "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=2000&q=80",
-        cast: [
-          {
-            id: 5,
-            name: "Emma Stone",
-            role: "Bella Baxter",
-            image:
-              "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80",
-            bio: "Academy Award-winning actress",
-          },
-          {
-            id: 6,
-            name: "Willem Dafoe",
-            role: "Dr. Godwin Baxter",
-            image:
-              "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
-            bio: "Legendary actor with diverse roles",
-          },
-        ],
-        trailer: "https://youtu.be/RlbR5N6veqw",
-        awards: ["Academy Award Winner", "Venice Film Festival Winner"],
-        boxOffice: "$102.3M",
-        language: "English",
-        productionCompany: "Searchlight Pictures",
-        releaseDate: "2023-12-08",
-        metacriticScore: 87,
-        rottenTomatoesScore: 92,
-      },
-    
-    {
-      id: 4,
-      title: "The Batman",
-      rating: 7.8,
-      year: 2022,
-      duration: "180 min",
-      genre: ["Action", "Drama", "Crime ","Mystery"],
-      director: "Matt Reeves",
-      description:
-        "The Batman is a 2022 American superhero film based on the DC Comics character Batman. Directed by Matt Reeves from a screenplay he wrote with Peter Craig, it is a reboot of the Batman film franchise produced by DC Films",
-      image:
-        "  https://assets-prd.ignimgs.com/2022/01/26/thebatman-newbutton-1643232430643.jpg",
-      backdrop:
-        "https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?auto=format&fit=crop&w=2000&q=80",
-      cast: [
-        {
-          id: 3,
-          name: "Robert pattinson",
-          role: "Actor",
-          image:
-            "https://i.pinimg.com/originals/ce/75/cd/ce75cd9448909344485cd00872659884.jpg",
-          bio: "Versatile actor known for intense performances",
-        },
-        {
-          id: 4,
-          name: "Kosha Engler",
-          role: "Actress",
-          image:
-            "https://m.media-amazon.com/images/M/MV5BMTZkY2JmNzYtNDJmZS00N2FhLTg5MDItYjY3MTFlOTFiNDRlXkEyXkFqcGdeQXVyMTMwMzk2Mg@@._V1_UY1200_CR165,0,630,1200_AL_.jpg",
-          bio: "Acclaimed actress with numerous awards",
-        },
-      ],
-      trailer: "https://youtu.be/mqqft2x_Aa4",
-      awards: ["Academy Award Winner", "BAFTA Winner", "Golden Globe Winner"],
-      boxOffice: "$957.8M",
-      language: "English",
-      productionCompany: "Universal Pictures",
-      releaseDate: "2022-03-04",
-      metacriticScore: 89,
-      rottenTomatoesScore: 93,
+  movieApi, 
+  MovieDetails as TMDBMovieDetails, 
+  MovieCredit,
+  MovieCredits,
+  MovieVideo, 
+  MovieImages, 
+  MovieReview
+} from '../services/movieApi';
+import { Link } from 'react-router-dom';
+
+interface MovieReviewsResponse {
+  page: number;
+  results: MovieReview[];
+  total_pages: number;
+  total_results: number;
+}
+
+interface MovieDetailsState {
+  movie: TMDBMovieDetails | null;
+  cast: MovieCredit[] | null;
+  videos: MovieVideo[];
+  images: MovieImages;
+  reviews: MovieReview[];
+  similarMovies: TMDBMovieDetails[];
+  recommendations: TMDBMovieDetails[];
+  loading: boolean;
+  error: string | null;
+  activeTab: 'trailers' | 'images';
+  isVideoPlaying: boolean;
+  activeVideoId: string | null;
+  expandedReviews: Set<string>;
+}
+
+const MovieDetails: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [state, setState] = useState<MovieDetailsState>({
+    movie: null,
+    cast: null,
+    videos: [],
+    images: {
+      id: 0,
+      backdrops: [],
+      posters: [],
+      logos: []
     },
-    
+    reviews: [],
+    similarMovies: [],
+    recommendations: [],
+    loading: true,
+    error: null,
+    activeTab: 'trailers',
+    isVideoPlaying: false,
+    activeVideoId: null,
+    expandedReviews: new Set()
+  });
 
+  useEffect(() => {
+    const testApi = async () => {
+      const isConnected = await tmdbService.testConnection();
+      if (!isConnected) {
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          error: 'Failed to connect to TMDB API. Please check your API configuration.',
+        }));
+        return false;
+      }
+      return true;
+    };
 
+    const fetchMovieData = async () => {
+      if (!id) return;
 
+      setState(prev => ({ ...prev, loading: true, error: null }));
 
+      try {
+        // Test API connection first
+        const isConnected = await testApi();
+        if (!isConnected) return;
 
-      
-      {
-        id: 5,
-        title: "Killer of the Flower moon",
-        rating: 7.9,
-        year: 2023,
-        duration: "105 min",
-        genre: ["Drama", "History", "War"],
-        director: "Jonathan Glazer",
-        description:
-          "The commandant of Auschwitz, Rudolf Höss, and his wife Hedwig, strive to build a dream life for their family in a house and garden next to the camp.",
-        image:
-          "https://images.unsplash.com/photo-1533928298208-27ff66555d8d?auto=format&fit=crop&w=2000&q=80",
-        backdrop:
-          "https://images.unsplash.com/photo-1533073526757-2c8ca1df9f1c?auto=format&fit=crop&w=2000&q=80",
-        cast: [
-          {
-            id: 7,
-            name: "Christian Friedel",
-            role: "Rudolf Höss",
-            image:
-              "https://images.unsplash.com/photo-1504257432389-52343af06ae3?auto=format&fit=crop&w=200&q=80",
-            bio: "German actor and musician",
-          },
-          {
-            id: 8,
-            name: "Sandra Hüller",
-            role: "Hedwig Höss",
-            image:
-              "https://images.unsplash.com/photo-1557296387-5358ad7997bb?auto=format&fit=crop&w=200&q=80",
-            bio: "Award-winning German actress",
-          },
-        ],
-        trailer: "https://youtu.be/7cx9nCHsemc",
-        awards: ["Academy Award Winner", "Cannes Film Festival Winner"],
-        boxOffice: "$27.1M",
-        language: "German",
-        productionCompany: "A24",
-        releaseDate: "2024-01-31",
-        metacriticScore: 94,
-        rottenTomatoesScore: 91,
-      },
-    ];
-    const { id } = useParams();
-    const movie = Movies.find((m) => m.id === Number(id)) || Movies[0];
+        const [
+          movie,
+          credits,
+          videos,
+          images,
+          reviewsData,
+          similarMoviesData,
+          recommendationsData
+        ] = await Promise.all([
+          movieApi.getDetails(id),
+          movieApi.getCredits(id),
+          movieApi.getVideos(id),
+          movieApi.getImages(id),
+          movieApi.getReviews(id),
+          movieApi.getSimilar(id),
+          movieApi.getRecommendations(id)
+        ]);
+
+        const typedReviewsData = reviewsData as unknown as MovieReviewsResponse;
+
+        setState(prev => ({
+          ...prev,
+          movie,
+          cast: credits.cast.slice(0, 10),
+          videos: videos.filter(video => video.site === 'YouTube' && (video.type === 'Trailer' || video.type === 'Teaser')),
+          images,
+          reviews: typedReviewsData.results.slice(0, 5),
+          similarMovies: similarMoviesData.results.slice(0, 6),
+          recommendations: recommendationsData.results.slice(0, 6),
+          loading: false,
+        }));
+      } catch (err) {
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          error: 'Failed to fetch movie data. Please try again later.',
+        }));
+        console.error('Error fetching movie data:', err);
+      }
+    };
+
+    fetchMovieData();
+  }, [id]);
+
+  const formatRuntime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}h ${remainingMinutes}m`;
+  };
+
+  const formatMoney = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  if (state.loading) return <Loading />;
+  if (state.error) return <div className="text-center text-red-500 p-4">{state.error}</div>;
+  if (!state.movie) return <div className="text-center p-4">Movie not found</div>;
+
+  const { movie, cast, videos, images, reviews, similarMovies, recommendations } = state;
+
     return (
-      <div>
-        <div className="relative h-[90vh]">
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${movie.backdrop || movie.image})` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80" />
-          </div>
-  
-          <div className="relative container mx-auto px-4 h-full flex items-end pb-12">
-            <div className="grid md:grid-cols-3 gap-8 items-end">
-              <div className="hidden md:block">
-                <img
-                  src={movie.image}
+    <AnimatePresence mode="wait">
+      <div className="min-h-screen bg-gray-900 text-white pb-12">
+        {/* Hero Section */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="relative h-[70vh]"
+        >
+          <img
+            src={getImageUrl(movie.backdrop_path, 'original')}
                   alt={movie.title}
-                  className="rounded-lg shadow-xl aspect-[2/3] object-cover"
-                />
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-8">
+            <div className="container mx-auto">
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-4xl md:text-6xl font-bold mb-4"
+              >
+                {movie.title}
+              </motion.h1>
+              <div className="flex flex-wrap gap-4 mb-4">
+                {movie.genres?.map((genre) => (
+                  <span
+                    key={genre.id}
+                    className="px-3 py-1 bg-gray-800 rounded-full text-sm"
+                  >
+                    {genre.name}
+                  </span>
+                ))}
               </div>
-  
-              <div className="md:col-span-2">
-                <div className="flex flex-wrap items-center gap-4 mb-4">
-                  <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full">
-                    <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                    <span className="text-yellow-500 font-semibold">
-                      {movie.rating} Rating
-                    </span>
+              <div className="flex flex-wrap gap-6 text-zinc-300 mb-6">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  <span>{new Date(movie.release_date).getFullYear()}</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full">
-                    <Clock className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-300">{movie.duration}</span>
+                {movie.runtime && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5" />
+                    <span>{formatRuntime(movie.runtime)}</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full">
-                    <Calendar className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-300">{movie.releaseDate}</span>
-                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-yellow-500 fill-current" />
+                  <span>{movie.vote_average.toFixed(1)} ({movie.vote_count.toLocaleString()} votes)</span>
                 </div>
-  
-                <h1 className="text-4xl md:text-6xl font-bold mb-4">
-                  {movie.title}
-                </h1>
-  
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {movie.genre.map((g) => (
-                    <span
-                      key={g}
-                      className="px-3 py-1 bg-gray-800/80 backdrop-blur-sm rounded-full text-sm"
-                    >
-                      {g}
-                    </span>
-                  ))}
                 </div>
-                <div className="flex flex-wrap gap-4">
-                  <a
-                    href={movie.trailer}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-yellow-500 text-black px-8 py-3 rounded-lg font-semibold flex items-center gap-2 hover:bg-yellow-400 transition-colors"
+              <p className="text-lg max-w-2xl mb-8">{movie.overview}</p>
+              {videos.length > 0 && (
+                <button
+                  onClick={() => {
+                    setState(prev => ({
+                      ...prev,
+                      isVideoPlaying: true,
+                      activeVideoId: videos[0].key,
+                    }));
+                  }}
+                  className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg font-semibold transition-colors"
                   >
                     <Play className="w-5 h-5" />
                     Watch Trailer
-                  </a>
-                  <button className="bg-gray-800/80 backdrop-blur-sm text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors flex items-center gap-2">
-                    <Heart className="w-5 h-5" />
-                    Add to Watchlist
                   </button>
-                  <button className="bg-gray-800/80 backdrop-blur-sm text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors">
-                    <Share2 className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           </div>
-        </div>
-        <main className="container mx-auto px-4 py-12">
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="md:col-span-2">
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold mb-4">Overview</h2>
-                <p className="text-gray-300 text-lg leading-relaxed">
-                  {movie.description}
-                </p>
-              </section>
-  
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold mb-6">Awards & Recognition</h2>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {movie.awards.map((award, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-3 bg-gray-800/50 backdrop-blur-sm p-4 rounded-lg"
-                    >
-                      <Award className="w-5 h-5 text-yellow-500" />
-                      <span>{award}</span>
-                    </div>
-                  ))}
-                  <div className="flex items-center gap-3 bg-gray-800/50 backdrop-blur-sm p-4 rounded-lg">
-                    <BarChart3 className="w-5 h-5 text-green-500" />
-                    <span>Metacritic: {movie.metacriticScore}/100</span>
+        </motion.div>
+
+        <div className="container mx-auto px-4">
+          {/* Movie Stats */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-8"
+          >
+            {movie.budget !== undefined && (
+              <div className="bg-gray-800 p-6 rounded-lg">
+                <h3 className="text-zinc-400 mb-2 flex items-center gap-2">
+                  <DollarSign className="w-5 h-5" />
+                  Budget
+                </h3>
+                <p className="text-2xl font-semibold">{formatMoney(movie.budget)}</p>
+              </div>
+            )}
+            {movie.revenue !== undefined && (
+              <div className="bg-gray-800 p-6 rounded-lg">
+                <h3 className="text-zinc-400 mb-2 flex items-center gap-2">
+                  <DollarSign className="w-5 h-5" />
+                  Revenue
+                </h3>
+                <p className="text-2xl font-semibold">{formatMoney(movie.revenue)}</p>
+              </div>
+            )}
+            <div className="bg-gray-800 p-6 rounded-lg">
+              <h3 className="text-zinc-400 mb-2 flex items-center gap-2">
+                <Star className="w-5 h-5" />
+                Rating
+              </h3>
+              <p className="text-2xl font-semibold">{movie.vote_average.toFixed(1)}/10</p>
                   </div>
-                  <div className="flex items-center gap-3 bg-gray-800/50 backdrop-blur-sm p-4 rounded-lg">
-                    <BarChart3 className="w-5 h-5 text-red-500" />
-                    <span>Rotten Tomatoes: {movie.rottenTomatoesScore}%</span>
-                  </div>
+            <div className="bg-gray-800 p-6 rounded-lg">
+              <h3 className="text-zinc-400 mb-2 flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Votes
+              </h3>
+              <p className="text-2xl font-semibold">{movie.vote_count.toLocaleString()}</p>
                 </div>
-              </section>
-              <section>
-                <h2 className="text-2xl font-bold mb-6">Top Cast</h2>
-                <div className="grid grid-cols-2 gap-6">
-                  {movie.cast.map((actor) => (
-                    <Link
-                      key={actor.id}
-                      to={`/actor/${actor.id}`}
-                      className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 hover:bg-gray-700/50 transition-colors flex gap-4"
+          </motion.section>
+
+          {/* Production Companies */}
+          {movie.production_companies && movie.production_companies.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="py-8"
+            >
+              <h2 className="text-2xl font-bold mb-6">Production Companies</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {movie.production_companies.map((company) => (
+                  <div
+                    key={company.id}
+                    className="bg-gray-800 p-6 rounded-lg flex flex-col items-center text-center"
+                  >
+                    {company.logo_path ? (
+                      <div className="h-20 flex items-center mb-4">
+                        <img
+                          src={getImageUrl(company.logo_path)}
+                          alt={company.name}
+                          className="max-h-full max-w-full object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-20 flex items-center justify-center mb-4">
+                        <span className="text-4xl text-gray-500">🎬</span>
+                      </div>
+                    )}
+                    <h3 className="font-semibold">{company.name}</h3>
+                    {company.origin_country && (
+                      <span className="text-sm text-gray-400 mt-1">{company.origin_country}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.section>
+          )}
+
+          {/* Cast Section */}
+          {cast && cast.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="py-12"
+            >
+              <h2 className="text-3xl font-bold mb-8">Cast</h2>
+              <Swiper
+                modules={[Navigation, Pagination]}
+                spaceBetween={20}
+                slidesPerView={2}
+                navigation
+                pagination={{ clickable: true }}
+                breakpoints={{
+                  640: { slidesPerView: 3 },
+                  768: { slidesPerView: 4 },
+                  1024: { slidesPerView: 5 },
+                }}
+              >
+                {cast.map((member) => (
+                  <SwiperSlide key={member.id}>
+                    <Link to={`/actor/${member.id}`}>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="relative aspect-[2/3] rounded-lg overflow-hidden"
+                      >
+                        <img
+                          src={getImageUrl(member.profile_path)}
+                          alt={member.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
+                          <p className="font-semibold">{member.name}</p>
+                          <p className="text-sm text-gray-300">{member.character}</p>
+                        </div>
+                      </motion.div>
+                    </Link>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </motion.section>
+          )}
+
+          {/* Media Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="py-12"
+          >
+            <div className="flex gap-4 mb-8">
+              <button
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  state.activeTab === 'trailers' ? 'bg-red-600' : 'bg-gray-800'
+                }`}
+                onClick={() => setState(prev => ({ ...prev, activeTab: 'trailers' }))}
+              >
+                Trailers ({videos.length})
+              </button>
+              <button
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  state.activeTab === 'images' ? 'bg-red-600' : 'bg-gray-800'
+                }`}
+                onClick={() => setState(prev => ({ ...prev, activeTab: 'images' }))}
+              >
+                Images ({images.backdrops.length})
+              </button>
+            </div>
+  
+            <AnimatePresence mode="wait">
+              {state.activeTab === 'trailers' ? (
+                <motion.div
+                  key="trailers"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  {videos.length > 0 ? (
+                    <Swiper
+                      modules={[Autoplay, Navigation, Pagination]}
+                      spaceBetween={20}
+                      slidesPerView={1}
+                      navigation
+                      pagination={{ clickable: true }}
+                      autoplay={{ delay: 5000 }}
+                    >
+                      {videos.map((video) => (
+                        <SwiperSlide key={video.id}>
+                          <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden">
+                            <iframe
+                              src={`https://www.youtube.com/embed/${video.key}`}
+                              title={video.name}
+                              className="w-full h-full"
+                              allowFullScreen
+                              loading="lazy"
+                            />
+                          </div>
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
+                  ) : (
+                    <div className="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
+                      <p className="text-gray-400">No trailers available</p>
+                    </div>
+                  )}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="images"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  {images.backdrops.length > 0 ? (
+                    <Swiper
+                      modules={[Navigation, Pagination]}
+                      spaceBetween={20}
+                      slidesPerView={1}
+                      navigation
+                      pagination={{ clickable: true }}
+                      breakpoints={{
+                        640: { slidesPerView: 2 },
+                        1024: { slidesPerView: 3 },
+                      }}
+                    >
+                      {images.backdrops.map((image, index) => (
+                        <SwiperSlide key={index}>
+                          <div className="aspect-video relative rounded-lg overflow-hidden bg-gray-800">
+                            <img
+                              src={getImageUrl(image.file_path, 'original')}
+                              alt={`Scene ${index + 1}`}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/placeholder.jpg';
+                              }}
+                            />
+                          </div>
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
+                  ) : (
+                    <div className="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
+                      <p className="text-gray-400">No images available</p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.section>
+
+          {/* Reviews Section */}
+          {reviews.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="py-12"
+            >
+              <h2 className="text-3xl font-bold mb-8">Reviews</h2>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {reviews.map((review) => (
+                  <motion.div
+                    key={review.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gray-800 p-6 rounded-lg"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-3">
+                        {review.author_details?.avatar_path ? (
+                          <img
+                            src={getImageUrl(review.author_details.avatar_path)}
+                            alt={review.author}
+                            className="w-10 h-10 rounded-full"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/avatar-placeholder.jpg';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                            <span className="text-xl">
+                              {review.author.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
+                        <div>
+                          <h3 className="font-semibold">{review.author}</h3>
+                          <span className="text-sm text-gray-400">
+                            {new Date(review.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      {review.author_details?.rating && (
+                        <span className="bg-yellow-500 text-black px-2 py-1 rounded flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-current" />
+                          {review.author_details.rating}/10
+                        </span>
+                      )}
+                    </div>
+                    <div className="relative">
+                      <p className={`text-gray-300 ${
+                        state.expandedReviews.has(review.id) ? '' : 'line-clamp-4'
+                      }`}>
+                        {review.content}
+                      </p>
+                      {review.content.length > 300 && (
+                        <motion.button
+                          onClick={() => {
+                            setState(prev => {
+                              const newExpandedReviews = new Set(prev.expandedReviews);
+                              if (newExpandedReviews.has(review.id)) {
+                                newExpandedReviews.delete(review.id);
+                              } else {
+                                newExpandedReviews.add(review.id);
+                              }
+                              return { ...prev, expandedReviews: newExpandedReviews };
+                            });
+                          }}
+                          className="mt-2 text-yellow-500 hover:text-yellow-400 transition-colors"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          {state.expandedReviews.has(review.id) ? 'Show Less' : 'Read More'}
+                        </motion.button>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.section>
+          )}
+
+          {/* Similar Movies Section */}
+          {state.similarMovies.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="py-12"
+            >
+              <h2 className="text-3xl font-bold mb-8">Similar Movies</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                {state.similarMovies.map((movie) => (
+                  <Link key={movie.id} to={`/movie/${movie.id}`}>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      className="relative aspect-[2/3] rounded-lg overflow-hidden group"
                     >
                       <img
-                        src={actor.image}
-                        alt={actor.name}
-                        className="w-24 h-24 rounded-xl object-cover"
+                        src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.jpg'}
+                        alt={movie.title}
+                        className="w-full h-full object-cover"
                       />
-                      <div>
-                        <h3 className="font-semibold text-lg mb-1">
-                          {actor.name}
-                        </h3>
-                        <p className="text-gray-400 mb-2">{actor.role}</p>
-                        <p className="text-sm text-gray-400 line-clamp-2">
-                          {actor.bio}
-                        </p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <h3 className="font-semibold text-sm">{movie.title}</h3>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                            <span className="text-sm">{movie.vote_average.toFixed(1)}</span>
+                          </div>
+                        </div>
                       </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            </div>
-  
-            <div>
-              <div className="sticky top-24 space-y-6">
-                <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6">
-                  <h3 className="font-semibold mb-4">Movie Info</h3>
-                  <dl className="space-y-4">
-                    <div>
-                      <dt className="text-gray-400">Director</dt>
-                      <dd>{movie.director}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-gray-400">Production Company</dt>
-                      <dd>{movie.productionCompany}</dd>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <dt className="text-gray-400">Box Office</dt>
-                      <dd className="flex items-center gap-1">
-                        <DollarSign className="w-4 h-4 text-green-500" />
-                        {movie.boxOffice}
-                      </dd>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <dt className="text-gray-400">Language</dt>
-                      <dd className="flex items-center gap-1">
-                        <Globe className="w-4 h-4 text-blue-500" />
-                        {movie.language}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
+                    </motion.div>
+                  </Link>
+                ))}
               </div>
-            </div>
-          </div>
-        </main>
+            </motion.section>
+          )}
+
+          {/* Recommendations Section */}
+          {state.recommendations.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="py-12"
+            >
+              <h2 className="text-3xl font-bold mb-8">Recommended Movies</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                {state.recommendations.map((movie) => (
+                  <Link key={movie.id} to={`/movie/${movie.id}`}>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      className="relative aspect-[2/3] rounded-lg overflow-hidden group"
+                    >
+                      <img
+                        src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.jpg'}
+                        alt={movie.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <h3 className="font-semibold text-sm">{movie.title}</h3>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                            <span className="text-sm">{movie.vote_average.toFixed(1)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </Link>
+                ))}
+              </div>
+            </motion.section>
+          )}
+        </div>
+
+        {/* Video Modal */}
+        <AnimatePresence>
+          {state.isVideoPlaying && state.activeVideoId && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+              onClick={() => setState(prev => ({ ...prev, isVideoPlaying: false, activeVideoId: null }))}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setState(prev => ({ ...prev, isVideoPlaying: false, activeVideoId: null }));
+                }
+              }}
+              tabIndex={0}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="video-modal-title"
+            >
+              <div 
+                className="w-full max-w-5xl aspect-video relative"
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setState(prev => ({ ...prev, isVideoPlaying: false, activeVideoId: null }))}
+                  className="absolute -top-12 right-0 text-white hover:text-yellow-500 transition-colors"
+                  aria-label="Close video"
+                >
+                  <X className="w-8 h-8" />
+                </button>
+                <iframe
+                  src={`https://www.youtube.com/embed/${state.activeVideoId}?autoplay=1`}
+                  title="Movie Trailer"
+                  id="video-modal-title"
+                  className="w-full h-full"
+                  allowFullScreen
+                  allow="autoplay"
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+    </AnimatePresence>
     );
   };
   

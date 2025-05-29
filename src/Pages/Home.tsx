@@ -1,143 +1,210 @@
-import React from "react";
-import Hero from "../components/Hero.tsx";
-import { Award, Clock, Star, TrendingUp } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import MovieCarousel from "../components/MovieCarousel.tsx";
-const Home = () => {
-  const trendingMovies = [
+import { Award, Clock, Star, TrendingUp, Film, Calendar } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Hero from "../components/Hero";
+import MovieCarousel from "../components/MovieCarousel";
+import { movieApi, MovieDetails } from "../services/movieApi";
+import LoadingSpinner from "../components/LoadingSpinner";
+
+interface HomeState {
+  trendingMovies: MovieDetails[];
+  upcomingMovies: MovieDetails[];
+  topRatedMovies: MovieDetails[];
+  nowPlayingMovies: MovieDetails[];
+  genres: Array<{ id: number; name: string }>;
+  loading: {
+    trending: boolean;
+    upcoming: boolean;
+    topRated: boolean;
+    nowPlaying: boolean;
+  };
+  error: string | null;
+}
+
+const Home: React.FC = () => {
+  const [state, setState] = useState<HomeState>({
+    trendingMovies: [],
+    upcomingMovies: [],
+    topRatedMovies: [],
+    nowPlayingMovies: [],
+    genres: [],
+    loading: {
+      trending: true,
+      upcoming: true,
+      topRated: true,
+      nowPlaying: true
+    },
+    error: null
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // First fetch genres
+        const genresResponse = await fetch(
+          `https://api.themoviedb.org/3/genre/movie/list?api_key=6ab98d239b1f508b4ded3346fc0c3b1c`
+        );
+        const genresData = await genresResponse.json();
+
+        // Then fetch movies
+        const [trending, upcoming, topRated, nowPlaying] = await Promise.all([
+          movieApi.getTrending(),
+          movieApi.getUpcoming(),
+          movieApi.getTopRated(),
+          movieApi.getNowPlaying()
+        ]);
+
+        // Helper function to add genres to movies
+        const addGenresToMovie = (movie: any): MovieDetails => {
+          const movieGenres = movie.genre_ids.map((id: number) => 
+            genresData.genres.find((g: any) => g.id === id)
+          ).filter(Boolean);
+
+          return {
+            ...movie,
+            genres: movieGenres
+          };
+        };
+
+        setState(prev => ({
+          ...prev,
+          genres: genresData.genres,
+          trendingMovies: trending.results.slice(0, 10).map(addGenresToMovie),
+          upcomingMovies: upcoming.results.slice(0, 10).map(addGenresToMovie),
+          topRatedMovies: topRated.results.slice(0, 10).map(addGenresToMovie),
+          nowPlayingMovies: nowPlaying.results.slice(0, 10).map(addGenresToMovie),
+          loading: {
+            trending: false,
+            upcoming: false,
+            topRated: false,
+            nowPlaying: false
+          }
+        }));
+      } catch (error) {
+        setState(prev => ({
+          ...prev,
+          error: "Failed to fetch movies. Please try again later.",
+          loading: {
+            trending: false,
+            upcoming: false,
+            topRated: false,
+            nowPlaying: false
+          }
+        }));
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const categories = [
     {
-      id: 1,
-      title: "Dune: Part Two",
-      rating: 8.8,
-      image:
-        "https://images.unsplash.com/photo-1534809027769-b00d750a6bac?auto=format&fit=crop&w=800&q=80",
-      year: 2024,
-      genre: ["Action", "Adventure", "Sci-Fi"],
+      icon: TrendingUp,
+      label: "Trending",
+      path: "/movies?sort=trending",
+      color: "bg-gradient-to-br from-yellow-500 to-yellow-600",
+      movies: state.trendingMovies,
+      loading: state.loading.trending
     },
     {
-      id: 2,
-      title: "Poor Things",
-      rating: 8.4,
-      image:
-        "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=800&q=80",
-      year: 2023,
-      genre: ["Comedy", "Drama", "Romance"],
+      icon: Star,
+      label: "Top Rated",
+      path: "/top-rated",
+      color: "bg-gradient-to-br from-purple-500 to-purple-600",
+      movies: state.topRatedMovies,
+      loading: state.loading.topRated
     },
     {
-      id: 3,
-      title: "Oppenheimer",
-      rating: 8.9,
-      image:
-        "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=800&q=80",
-      year: 2023,
-      genre: ["Biography", "Drama", "History"],
+      icon: Clock,
+      label: "Coming Soon",
+      path: "/comingsoon",
+      color: "bg-gradient-to-br from-blue-500 to-blue-600",
+      movies: state.upcomingMovies,
+      loading: state.loading.upcoming
     },
     {
-      id: 4,
-      title: "The Batman",
-      rating: 8.5,
-      image:
-        "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?auto=format&fit=crop&w=800&q=80",
-      year: 2024,
-      genre: ["Action", "Crime", "Drama"],
-    },
-    {
-      id: 5,
-      title: "Killers of the Flower Moon",
-      rating: 8.7,
-      image:
-        "https://images.unsplash.com/photo-1533928298208-27ff66555d8d?auto=format&fit=crop&w=800&q=80",
-      year: 2023,
-      genre: ["Crime", "Drama", "History"],
-    },
+      icon: Film,
+      label: "Now Playing",
+      path: "/now-playing",
+      color: "bg-gradient-to-br from-red-500 to-red-600",
+      movies: state.nowPlayingMovies,
+      loading: state.loading.nowPlaying
+    }
   ];
 
-  const upcomingMovies = [
-    {
-      id: 6,
-      title: "Deadpool 3",
-      rating: 9.1,
-      image:
-        "https://images.unsplash.com/photo-1535016120720-40c646be5580?auto=format&fit=crop&w=800&q=80",
-      year: 2024,
-      genre: ["Action", "Comedy", "Adventure"],
-    },
-    {
-      id: 8,
-      title: "Kingdom of the Planet of the Apes",
-      rating: 8.3,
-      image:
-        "https://images.unsplash.com/photo-1533973860717-d49dfd14cf64?auto=format&fit=crop&w=800&q=80",
-      year: 2024,
-      genre: ["Action", "Adventure", "Drama"],
-    },
-  ];
+  if (state.error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-red-500/10 border border-red-500 rounded-lg p-4 max-w-md mx-auto">
+          <p className="text-red-400 text-center">{state.error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-900">
       <Hero />
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          {[
-            {
-              icon: TrendingUp,
-              label: "Trending",
-              path: "/movies?sort=trending",
-              color: "bg-yellow-500",
-            },
-            {
-              icon: Star,
-              label: "Top Rated",
-              path: "/top-rated",
-              color: "bg-purple-500",
-            },
-            {
-              icon: Clock,
-              label: "Coming Soon",
-              path: "/coming-soon",
-              color: "bg-blue-500",
-            },
-            {
-              icon: Award,
-              label: "Awards",
-              path: "/awards",
-              color: "bg-red-500",
-            },
-          ].map((category, index) => (
+          {categories.map((category, index) => (
             <Link
               key={index}
               to={category.path}
-              className={`${category.color} p-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-70 transition-opacity`}
+              className="relative group"
             >
-              <category.icon className="w-5 h-5" />
-              <span className="font-medium">{category.label}</span>
+              <motion.div
+                className={`${category.color} p-6 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 group-hover:scale-105 shadow-lg`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <category.icon className="w-6 h-6" />
+                <span className="font-medium text-center">{category.label}</span>
+                {category.movies.length > 0 && (
+                  <span className="text-sm opacity-75">
+                    {category.movies.length} movies
+                  </span>
+                )}
+              </motion.div>
             </Link>
           ))}
         </div>
-        <section className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <TrendingUp className="w-6 h-6 text-yellow-500" />
-              Trending Now
-            </h2>
-            <Link to="/movies?sort=trending" className="text-yellow-500 hover:text-yellow-400">
-              View All
-            </Link>
-          </div>
-          <MovieCarousel movies={trendingMovies}/>
-        </section>
-        <section className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <Clock className="w-6 h-6 text-yellow-500" />
-              Coming Soon
-            </h2>
-            <Link to="/coming-soon" className="text-yellow-500 hover:text-yellow-400">
-              View All
-            </Link>
-          </div>
-          <MovieCarousel movies={upcomingMovies}/>
-        </section>
+
+        <AnimatePresence mode="wait">
+          {categories.map((category, index) => (
+            <motion.section
+              key={category.label}
+              className="mb-12"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.2 }}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <category.icon className="w-6 h-6 text-yellow-500" />
+                  {category.label}
+                </h2>
+                <Link
+                  to={category.path}
+                  className="text-yellow-500 hover:text-yellow-400 transition-colors flex items-center gap-1"
+                >
+                  View All
+                  <Calendar className="w-4 h-4" />
+                </Link>
+              </div>
+              {category.loading ? (
+                <div className="flex justify-center py-12">
+                  <LoadingSpinner />
+                </div>
+              ) : (
+                <MovieCarousel movies={category.movies} />
+              )}
+            </motion.section>
+          ))}
+        </AnimatePresence>
       </main>
     </div>
   );
