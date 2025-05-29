@@ -63,11 +63,10 @@ import { Film, Search, Menu, X, Star, CalendarClock } from 'lucide-react'
           </div>
         </div>
 
-        {/* Mobile Menu Overlay */}
         {isMenuOpen && (
           <div className='md:hidden fixed inset-0 bg-black/90 z-50'>
             <div className='flex flex-col h-full'>
-              {/* Header with Search */}
+             
               <div className='p-4 border-b border-zinc-800'>
                 <div className='flex items-center justify-end mb-4'>
                   <button onClick={() => setIsMenuOpen(false)} className='text-zinc-300 hover:text-white'>
@@ -86,7 +85,7 @@ import { Film, Search, Menu, X, Star, CalendarClock } from 'lucide-react'
                 </form>
               </div>
 
-              {/* Navigation Links - Left Aligned with smaller size */}
+             
               <div className='p-4 space-y-1'>
                 {navitems.map((item) => (
                   <Link 
@@ -99,7 +98,7 @@ import { Film, Search, Menu, X, Star, CalendarClock } from 'lucide-react'
                     <span className="text-sm">{item.label}</span>
                   </Link>
                 ))}
-                {/* Search Link */}
+               
                 <Link 
                   to="/search"
                   className="flex items-center gap-2 text-zinc-300 hover:text-yellow-500 py-2 px-3 rounded-lg hover:bg-zinc-800/50 transition-all"
@@ -115,28 +114,27 @@ import { Film, Search, Menu, X, Star, CalendarClock } from 'lucide-react'
       
       </div> 
 
-      {/* Mobile Bottom Navigation Bar */}
+      
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/70 backdrop-blur-md border-t border-zinc-800 z-50">
         <div className="grid grid-cols-4 h-16">
-          {/* Movies */}
+        
           <Link to="/movies" className="flex flex-col items-center justify-center gap-1 text-zinc-300 hover:text-yellow-500">
             <Film className="w-6 h-6" />
             <span className="text-xs">Movies</span>
           </Link>
 
-          {/* Top Rated */}
+        
           <Link to="/top-rated" className="flex flex-col items-center justify-center gap-1 text-zinc-300 hover:text-yellow-500">
             <Star className="w-6 h-6" />
             <span className="text-xs">Top Rated</span>
           </Link>
 
-          {/* Coming Soon */}
           <Link to="/comingsoon" className="flex flex-col items-center justify-center gap-1 text-zinc-300 hover:text-yellow-500">
             <CalendarClock className="w-6 h-6" />
             <span className="text-xs">Coming Soon</span>
           </Link>
 
-          {/* Search */}
+          
           <Link to="/search" className="flex flex-col items-center justify-center gap-1 text-zinc-300 hover:text-yellow-500">
             <Search className="w-6 h-6" />
             <span className="text-xs">Search</span>

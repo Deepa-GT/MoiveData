@@ -139,7 +139,7 @@ export interface MovieWatchProviders {
 }
 
 export const movieApi = {
-  // Get movie details
+ 
   getDetails: async (movieId: string | number, appendToResponse?: string[]) => {
     try {
       const response = await tmdbApi.get<MovieDetails>(`/movie/${movieId}`, {
@@ -153,7 +153,7 @@ export const movieApi = {
     }
   },
 
-  // Get movie credits (cast & crew)
+ 
   getCredits: async (movieId: string | number) => {
     try {
       const response = await tmdbApi.get<MovieCredits>(`/movie/${movieId}/credits`);
@@ -163,7 +163,7 @@ export const movieApi = {
     }
   },
 
-  // Get movie videos (trailers, teasers, etc.)
+  
   getVideos: async (movieId: string | number) => {
     try {
       const response = await tmdbApi.get<{ results: MovieVideo[] }>(`/movie/${movieId}/videos`);
@@ -173,7 +173,6 @@ export const movieApi = {
     }
   },
 
-  // Get movie images (posters, backdrops, logos)
   getImages: async (movieId: string | number, includeLanguage?: string) => {
     try {
       const response = await tmdbApi.get<MovieImages>(`/movie/${movieId}/images`, {
@@ -187,7 +186,7 @@ export const movieApi = {
     }
   },
 
-  // Get movie reviews
+  
   getReviews: async (movieId: string | number, page: number = 1) => {
     try {
       const response = await tmdbApi.get<MovieListResult>(`/movie/${movieId}/reviews`, {
@@ -199,7 +198,7 @@ export const movieApi = {
     }
   },
 
-  // Get similar movies
+ 
   getSimilar: async (movieId: string | number, page: number = 1) => {
     try {
       const response = await tmdbApi.get<MovieListResult>(`/movie/${movieId}/similar`, {
@@ -211,7 +210,7 @@ export const movieApi = {
     }
   },
 
-  // Get movie recommendations
+  
   getRecommendations: async (movieId: string | number, page: number = 1) => {
     try {
       const response = await tmdbApi.get<MovieListResult>(`/movie/${movieId}/recommendations`, {
@@ -223,7 +222,7 @@ export const movieApi = {
     }
   },
 
-  // Get movie keywords
+ 
   getKeywords: async (movieId: string | number) => {
     try {
       const response = await tmdbApi.get<MovieKeywords>(`/movie/${movieId}/keywords`);
@@ -233,7 +232,7 @@ export const movieApi = {
     }
   },
 
-  // Get movie watch providers (streaming, rent, buy options)
+  
   getWatchProviders: async (movieId: string | number) => {
     try {
       const response = await tmdbApi.get<MovieWatchProviders>(`/movie/${movieId}/watch/providers`);
@@ -243,7 +242,6 @@ export const movieApi = {
     }
   },
 
-  // Search movies
   searchMovies: async (query: string, page: number = 1, includeAdult: boolean = false) => {
     try {
       const response = await tmdbApi.get<MovieListResult>('/search/movie', {
@@ -259,7 +257,7 @@ export const movieApi = {
     }
   },
 
-  // Get trending movies
+  
   getTrending: async (page: number = 1) => {
     try {
       const response = await tmdbApi.get<MovieListResult>('/trending/movie/week', {
@@ -271,7 +269,7 @@ export const movieApi = {
     }
   },
 
-  // Get now playing movies
+ 
   getNowPlaying: async (page: number = 1) => {
     try {
       const response = await tmdbApi.get<MovieListResult>('/movie/now_playing', {
@@ -283,7 +281,7 @@ export const movieApi = {
     }
   },
 
-  // Get popular movies
+ 
   getPopular: async (page: number = 1, region?: string) => {
     try {
       const response = await tmdbApi.get<MovieListResult>('/movie/popular', {
@@ -295,7 +293,6 @@ export const movieApi = {
     }
   },
 
-  // Get top rated movies
   getTopRated: async (page: number = 1) => {
     try {
       const response = await tmdbApi.get<MovieListResult>('/movie/top_rated', {
@@ -307,7 +304,7 @@ export const movieApi = {
     }
   },
 
-  // Get upcoming movies
+  
   getUpcoming: async (page: number = 1) => {
     try {
       const response = await tmdbApi.get<MovieListResult>('/movie/upcoming', {
@@ -319,7 +316,7 @@ export const movieApi = {
     }
   },
 
-  // Helper function to format movie data
+ 
   formatMovieData: (movie: MovieDetails) => {
     return {
       id: movie.id,

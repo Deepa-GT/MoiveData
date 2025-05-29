@@ -41,7 +41,6 @@ const ActorDetails: React.FC = () => {
           actorApi.getExternalIds(id)
         ]);
 
-        // Sort movies by popularity and filter out movies without posters
         const sortedMovies = creditsData.cast
           .sort((a, b) => b.popularity - a.popularity)
           .filter(movie => movie.poster_path);
