@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Award, Clock, Star, TrendingUp, Film, Calendar } from "lucide-react";
+import { Clock, Star, TrendingUp, Film, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Hero from "../components/Hero";
 import MovieCarousel from "../components/MovieCarousel";
@@ -41,13 +41,12 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // First fetch genres
+        
         const genresResponse = await fetch(
           `https://api.themoviedb.org/3/genre/movie/list?api_key=6ab98d239b1f508b4ded3346fc0c3b1c`
         );
         const genresData = await genresResponse.json();
 
-        // Then fetch movies
         const [trending, upcoming, topRated, nowPlaying] = await Promise.all([
           movieApi.getTrending(),
           movieApi.getUpcoming(),
@@ -55,7 +54,7 @@ const Home: React.FC = () => {
           movieApi.getNowPlaying()
         ]);
 
-        // Helper function to add genres to movies
+        
         const addGenresToMovie = (movie: any): MovieDetails => {
           const movieGenres = movie.genre_ids.map((id: number) => 
             genresData.genres.find((g: any) => g.id === id)
@@ -182,23 +181,23 @@ const Home: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.2 }}
             >
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
                   <category.icon className="w-6 h-6 text-yellow-500" />
                   {category.label}
-                </h2>
+            </h2>
                 <Link
                   to={category.path}
                   className="text-yellow-500 hover:text-yellow-400 transition-colors flex items-center gap-1"
                 >
-                  View All
+              View All
                   <Calendar className="w-4 h-4" />
-                </Link>
-              </div>
+            </Link>
+          </div>
               {category.loading ? (
                 <div className="flex justify-center py-12">
                   <LoadingSpinner />
-                </div>
+          </div>
               ) : (
                 <MovieCarousel movies={category.movies} />
               )}

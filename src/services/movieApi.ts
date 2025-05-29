@@ -24,13 +24,17 @@ export interface MovieDetails {
     origin_country: string;
   }>;
   videos?: {
-    results: Array<{
-      id: string;
-      key: string;
-      name: string;
-      site: string;
-      type: string;
-    }>;
+    results: MovieVideo[];
+  };
+  images?: MovieImages;
+  reviews?: {
+    results: MovieReview[];
+  };
+  similarMovies?: {
+    results: MovieDetails[];
+  };
+  recommendations?: {
+    results: MovieDetails[];
   };
 }
 
@@ -167,7 +171,7 @@ export const movieApi = {
   getVideos: async (movieId: string | number) => {
     try {
       const response = await tmdbApi.get<{ results: MovieVideo[] }>(`/movie/${movieId}/videos`);
-      return response.data.results;
+      return response.data;
     } catch (error) {
       throw new TMDBError('Failed to fetch movie videos');
     }

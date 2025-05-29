@@ -27,6 +27,11 @@ interface MovieReviewsResponse {
   total_results: number;
 }
 
+interface MovieVideosResponse {
+  id: number;
+  results: MovieVideo[];
+}
+
 interface MovieDetailsState {
   movie: TMDBMovieDetails | null;
   cast: MovieCredit[] | null;
@@ -67,71 +72,63 @@ const MovieDetails: React.FC = () => {
   });
 
   useEffect(() => {
-    const testApi = async () => {
-      const isConnected = await tmdbService.testConnection();
-      if (!isConnected) {
-        setState(prev => ({
-          ...prev,
-          loading: false,
-          error: 'Failed to connect to TMDB API. Please check your API configuration.',
-        }));
-        return false;
-      }
-      return true;
-    };
-
-    const fetchMovieData = async () => {
+    const fetchMovieDetails = async () => {
       if (!id) return;
-
+      
       setState(prev => ({ ...prev, loading: true, error: null }));
-
+      
       try {
-        // Test API connection first
-        const isConnected = await testApi();
-        if (!isConnected) return;
-
-        const [
-          movie,
-          credits,
-          videos,
-          images,
-          reviewsData,
-          similarMoviesData,
-          recommendationsData
-        ] = await Promise.all([
+        const [details, credits, videosResponse] = await Promise.all([
           movieApi.getDetails(id),
           movieApi.getCredits(id),
-          movieApi.getVideos(id),
-          movieApi.getImages(id),
-          movieApi.getReviews(id),
-          movieApi.getSimilar(id),
-          movieApi.getRecommendations(id)
+          movieApi.getVideos(id)
         ]);
 
-        const typedReviewsData = reviewsData as unknown as MovieReviewsResponse;
+        // Fetch images separately if not included in details
+        const images = details.images || await movieApi.getImages(id);
 
         setState(prev => ({
           ...prev,
-          movie,
+          movie: details,
           cast: credits.cast.slice(0, 10),
-          videos: videos.filter(video => video.site === 'YouTube' && (video.type === 'Trailer' || video.type === 'Teaser')),
-          images,
-          reviews: typedReviewsData.results.slice(0, 5),
-          similarMovies: similarMoviesData.results.slice(0, 6),
-          recommendations: recommendationsData.results.slice(0, 6),
+          videos: videosResponse.results || [],
+          images: images || {
+            id: details.id,
+            backdrops: [],
+            posters: [],
+            logos: []
+          },
+          reviews: details.reviews?.results?.slice(0, 5) || [],
+          similarMovies: details.similarMovies?.results?.slice(0, 6) || [],
+          recommendations: details.recommendations?.results?.slice(0, 6) || [],
           loading: false,
         }));
+
+        // Load similar movies and recommendations in the background
+        const loadExtraData = async () => {
+          const [similar, recommended] = await Promise.all([
+            movieApi.getSimilar(id),
+            movieApi.getRecommendations(id)
+          ]);
+          setState(prev => ({ 
+            ...prev, 
+            similarMovies: similar.results.slice(0, 6), 
+            recommendations: recommended.results.slice(0, 6) 
+          }));
+        };
+        
+        loadExtraData().catch(console.error);
       } catch (err) {
         setState(prev => ({
           ...prev,
           loading: false,
-          error: 'Failed to fetch movie data. Please try again later.',
+          error: 'Failed to load movie details. Please try again later.',
         }));
-        console.error('Error fetching movie data:', err);
+        console.error('Error loading movie:', err);
       }
     };
 
-    fetchMovieData();
+    fetchMovieDetails();
   }, [id]);
 
   const formatRuntime = (minutes: number) => {
@@ -238,7 +235,7 @@ const MovieDetails: React.FC = () => {
                   Budget
                 </h3>
                 <p className="text-2xl font-semibold">{formatMoney(movie.budget)}</p>
-              </div>
+                    </div>
             )}
             {movie.revenue !== undefined && (
               <div className="bg-gray-800 p-6 rounded-lg">
@@ -247,7 +244,7 @@ const MovieDetails: React.FC = () => {
                   Revenue
                 </h3>
                 <p className="text-2xl font-semibold">{formatMoney(movie.revenue)}</p>
-              </div>
+                  </div>
             )}
             <div className="bg-gray-800 p-6 rounded-lg">
               <h3 className="text-zinc-400 mb-2 flex items-center gap-2">
@@ -265,7 +262,7 @@ const MovieDetails: React.FC = () => {
                 </div>
           </motion.section>
 
-          {/* Production Companies */}
+          
           {movie.production_companies && movie.production_companies.length > 0 && (
             <motion.section
               initial={{ opacity: 0, y: 20 }}
@@ -302,7 +299,8 @@ const MovieDetails: React.FC = () => {
             </motion.section>
           )}
 
-          {/* Cast Section */}
+         
+         
           {cast && cast.length > 0 && (
             <motion.section
               initial={{ opacity: 0, y: 20 }}
@@ -346,7 +344,8 @@ const MovieDetails: React.FC = () => {
             </motion.section>
           )}
 
-          {/* Media Section */}
+          
+          
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -454,7 +453,6 @@ const MovieDetails: React.FC = () => {
             </AnimatePresence>
           </motion.section>
 
-          {/* Reviews Section */}
           {reviews.length > 0 && (
             <motion.section
               initial={{ opacity: 0, y: 20 }}
@@ -536,7 +534,6 @@ const MovieDetails: React.FC = () => {
             </motion.section>
           )}
 
-          {/* Similar Movies Section */}
           {state.similarMovies.length > 0 && (
             <motion.section
               initial={{ opacity: 0, y: 20 }}
@@ -564,7 +561,7 @@ const MovieDetails: React.FC = () => {
                             <span className="text-sm">{movie.vote_average.toFixed(1)}</span>
                           </div>
                         </div>
-                      </div>
+                </div>
                     </motion.div>
                   </Link>
                 ))}
@@ -572,7 +569,8 @@ const MovieDetails: React.FC = () => {
             </motion.section>
           )}
 
-          {/* Recommendations Section */}
+         
+         
           {state.recommendations.length > 0 && (
             <motion.section
               initial={{ opacity: 0, y: 20 }}
@@ -598,9 +596,9 @@ const MovieDetails: React.FC = () => {
                           <div className="flex items-center gap-1 mt-1">
                             <Star className="w-4 h-4 text-yellow-500 fill-current" />
                             <span className="text-sm">{movie.vote_average.toFixed(1)}</span>
-                          </div>
-                        </div>
-                      </div>
+              </div>
+            </div>
+          </div>
                     </motion.div>
                   </Link>
                 ))}
@@ -609,7 +607,7 @@ const MovieDetails: React.FC = () => {
           )}
         </div>
 
-        {/* Video Modal */}
+        
         <AnimatePresence>
           {state.isVideoPlaying && state.activeVideoId && (
             <motion.div
