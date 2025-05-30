@@ -1,26 +1,13 @@
 import axios, { AxiosError } from 'axios';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-const TMDB_API_KEY = process.env.REACT_APP_TMDB_API_KEY;
+const TMDB_API_KEY = '6ab98d239b1f508b4ded3346fc0c3b1c'; // Your API key here
 
-if (!TMDB_API_KEY) {
-  throw new Error('TMDB API key is not configured. Please set REACT_APP_TMDB_API_KEY in your environment variables.');
-}
-
-export enum TMDBErrorType {
-  AUTHENTICATION = 'AUTHENTICATION',
-  NOT_FOUND = 'NOT_FOUND',
-  RATE_LIMIT = 'RATE_LIMIT',
-  SERVER_ERROR = 'SERVER_ERROR',
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  UNKNOWN = 'UNKNOWN'
-}
-
+// Error handling
 export class TMDBError extends Error {
   constructor(
     message: string,
     public statusCode?: number,
-    public errorType: TMDBErrorType = TMDBErrorType.UNKNOWN,
     public response?: any
   ) {
     super(message);
@@ -28,6 +15,7 @@ export class TMDBError extends Error {
   }
 }
 
+// Configure axios instance for TMDB
 export const tmdbApi = axios.create({
   baseURL: TMDB_BASE_URL,
   params: {
@@ -38,6 +26,7 @@ export const tmdbApi = axios.create({
   },
 });
 
+// Add request interceptor for debugging
 tmdbApi.interceptors.request.use(request => {
   // Remove api_key from logs for security
   const sanitizedUrl = request.url?.replace(/api_key=[^&]+/, 'api_key=HIDDEN');
@@ -45,6 +34,7 @@ tmdbApi.interceptors.request.use(request => {
   return request;
 });
 
+// Add response interceptor for error handling
 tmdbApi.interceptors.response.use(
   (response) => {
     console.log('API Response:', response.status, response.config.url?.replace(/api_key=[^&]+/, 'api_key=HIDDEN'));
@@ -56,58 +46,14 @@ tmdbApi.interceptors.response.use(
       status: error.response?.status,
       message: error.response?.data
     });
-
     if (error.response) {
-      const status = error.response.status;
-      const data = error.response.data as any;
-
-      switch (status) {
-        case 401:
-          throw new TMDBError(
-            'Authentication failed. Please check your API key.',
-            status,
-            TMDBErrorType.AUTHENTICATION,
-            data
-          );
-        case 404:
-          throw new TMDBError(
-            'The requested resource was not found.',
-            status,
-            TMDBErrorType.NOT_FOUND,
-            data
-          );
-        case 429:
-          throw new TMDBError(
-            'Rate limit exceeded. Please try again later.',
-            status,
-            TMDBErrorType.RATE_LIMIT,
-            data
-          );
-        case 500:
-        case 502:
-        case 503:
-        case 504:
-          throw new TMDBError(
-            'TMDB server error. Please try again later.',
-            status,
-            TMDBErrorType.SERVER_ERROR,
-            data
-          );
-        default:
-          throw new TMDBError(
-            data?.status_message || 'An unknown error occurred',
-            status,
-            TMDBErrorType.UNKNOWN,
-            data
-          );
-      }
+      throw new TMDBError(
+        (error.response.data as any)?.status_message || 'TMDB API Error',
+        error.response.status,
+        error.response.data
+      );
     }
-    
-    throw new TMDBError(
-      'Network error. Please check your internet connection.',
-      undefined,
-      TMDBErrorType.NETWORK_ERROR
-    );
+    throw new TMDBError('Network Error');
   }
 );
 
@@ -210,6 +156,7 @@ export const tmdbService = {
     }
   },
 
+  // Movie endpoints
   getMovieDetails: async (movieId: string) => {
     try {
       const response = await tmdbApi.get<TMDBMovie>(`/movie/${movieId}`);
@@ -260,7 +207,7 @@ export const tmdbService = {
     }
   },
 
-  
+  // Person endpoints
   getPersonDetails: async (personId: string) => {
     const response = await tmdbApi.get<TMDBPerson>(`/person/${personId}`);
     return response.data;
@@ -271,7 +218,7 @@ export const tmdbService = {
     return response.data;
   },
 
- 
+  // Search endpoints
   searchMovies: async (query: string, page: number = 1) => {
     try {
       const response = await tmdbApi.get<TMDBResponse<TMDBMovie>>('/search/movie', {
@@ -296,6 +243,6 @@ export const tmdbService = {
 };
 
 export const getImageUrl = (path: string | null, size: 'w500' | 'original' = 'w500') => {
-  if (!path) return '/placeholder-image.jpg'; 
+  if (!path) return '/placeholder-image.jpg'; // You should add a placeholder image
   return `https://image.tmdb.org/t/p/${size}${path}`;
 }; 

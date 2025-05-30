@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Clock, Star, TrendingUp, Film, Calendar } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, LazyMotion, domAnimation } from "framer-motion";
 import Hero from "../components/Hero";
 import MovieCarousel from "../components/MovieCarousel";
 import { movieApi, MovieDetails } from "../services/movieApi";
@@ -99,25 +99,25 @@ const Home: React.FC = () => {
   }, []);
 
   const categories = [
-    {
-      icon: TrendingUp,
-      label: "Trending",
-      path: "/movies?sort=trending",
+            {
+              icon: TrendingUp,
+              label: "Trending",
+              path: "/movies?sort=trending",
       color: "bg-gradient-to-br from-yellow-500 to-yellow-600",
       movies: state.trendingMovies,
       loading: state.loading.trending
-    },
-    {
-      icon: Star,
-      label: "Top Rated",
-      path: "/top-rated",
+            },
+            {
+              icon: Star,
+              label: "Top Rated",
+              path: "/top-rated",
       color: "bg-gradient-to-br from-purple-500 to-purple-600",
       movies: state.topRatedMovies,
       loading: state.loading.topRated
-    },
-    {
-      icon: Clock,
-      label: "Coming Soon",
+            },
+            {
+              icon: Clock,
+              label: "Coming Soon",
       path: "/comingsoon",
       color: "bg-gradient-to-br from-blue-500 to-blue-600",
       movies: state.upcomingMovies,
@@ -144,68 +144,71 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <Hero />
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          {categories.map((category, index) => (
+    <LazyMotion features={domAnimation}>
+      <div className="min-h-screen bg-gray-900">
+        <Hero />
+        <main className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            {categories.map((category, index) => (
             <Link
               key={index}
               to={category.path}
-              className="relative group"
-            >
-              <motion.div
-                className={`${category.color} p-6 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 group-hover:scale-105 shadow-lg`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                className="relative group"
               >
-                <category.icon className="w-6 h-6" />
-                <span className="font-medium text-center">{category.label}</span>
-                {category.movies.length > 0 && (
-                  <span className="text-sm opacity-75">
-                    {category.movies.length} movies
-                  </span>
-                )}
-              </motion.div>
+                <motion.div
+                  className={`${category.color} p-6 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 group-hover:scale-105 shadow-lg`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <category.icon className="w-6 h-6" />
+                  <span className="font-medium text-center">{category.label}</span>
+                  {category.movies.length > 0 && (
+                    <span className="text-sm opacity-75">
+                      {category.movies.length} movies
+                    </span>
+                  )}
+                </motion.div>
             </Link>
           ))}
         </div>
 
-        <AnimatePresence mode="wait">
-          {categories.map((category, index) => (
-            <motion.section
-              key={category.label}
-              className="mb-12"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.2 }}
-            >
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <category.icon className="w-6 h-6 text-yellow-500" />
-                  {category.label}
-            </h2>
-                <Link
-                  to={category.path}
-                  className="text-yellow-500 hover:text-yellow-400 transition-colors flex items-center gap-1"
-                >
-              View All
-                  <Calendar className="w-4 h-4" />
-            </Link>
-          </div>
-              {category.loading ? (
-                <div className="flex justify-center py-12">
-                  <LoadingSpinner />
-          </div>
-              ) : (
-                <MovieCarousel movies={category.movies} />
-              )}
-            </motion.section>
-          ))}
-        </AnimatePresence>
+          <AnimatePresence mode="wait" initial={false}>
+            {categories.map((category, index) => (
+              <motion.section
+                key={category.label}
+                className="mb-12"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ delay: index * 0.2 }}
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <category.icon className="w-6 h-6 text-yellow-500" />
+                    {category.label}
+                  </h2>
+                  <Link
+                    to={category.path}
+                    className="text-yellow-500 hover:text-yellow-400 transition-colors flex items-center gap-1"
+                  >
+                    View All
+                    <Calendar className="w-4 h-4" />
+                  </Link>
+                </div>
+                {category.loading ? (
+                  <div className="flex justify-center py-12">
+                    <LoadingSpinner />
+                  </div>
+                ) : (
+                  <MovieCarousel movies={category.movies} />
+                )}
+              </motion.section>
+            ))}
+          </AnimatePresence>
       </main>
     </div>
+    </LazyMotion>
   );
 };
 

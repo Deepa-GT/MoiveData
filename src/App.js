@@ -1,16 +1,16 @@
 import "./App.css";
 import Home from "./Pages/Home.tsx";
 import Navbar from "./components/Navbar.tsx";
-import { HashRouter, Routes, Route } from "react-router-dom";
-import MovieList from "./Pages/MovieList.tsx";
-import MovieDetails from "./Pages/MovieDetails.tsx";
-import Toprated from "./Pages/Toprated.tsx";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+ import MovieList from "./Pages/MovieList.tsx";
+ import MovieDetails from "./Pages/MovieDetails.tsx";
+ import Toprated from "./Pages/Toprated.tsx";
 import Actordetails from "./Pages/ActorDetails.tsx";
 import ComingSoon from "./Pages/ComingSoon.tsx";
 
 function App() {
   return (
-    <HashRouter>
+   <BrowserRouter>
       <div className="min-h-screen bg-black text-white">
         <Navbar />
         <Routes>
@@ -21,8 +21,8 @@ function App() {
           <Route path="/top-rated" element={<Toprated/>}/>
           <Route path="/comingsoon" element={<ComingSoon />} />
         </Routes>
-      </div>
-    </HashRouter>
+        </div>
+      </BrowserRouter>
   );
 }
 

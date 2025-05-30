@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Actor, MovieCredit, actorApi } from '../services/actorApi';
 import { getImageUrl } from '../services/tmdb';
 import LoadingSpinner from '../components/LoadingSpinner';
+
 import { Film, Calendar, Star, TrendingUp, Search } from 'lucide-react';
 
 interface SocialMedia {
